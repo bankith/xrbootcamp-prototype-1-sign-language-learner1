@@ -112,10 +112,10 @@ Material:
     - _OutlineGlowIntensity: 1
     - _OutlineGradient: 0
     - _OutlineIntensity: 1
-    - _OutlineOpacity: 1
+    - _OutlineOpacity: 0.9
     - _OutlinePinchRange: 0.15
     - _OutlineSphereHardness: 0.15
-    - _OutlineWidth: 0.00134
+    - _OutlineWidth: 0.002
     - _Parallax: 0.02
     - _PinchIntensity: 0
     - _PinchRange: 0.03

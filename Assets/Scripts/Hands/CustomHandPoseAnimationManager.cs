@@ -21,20 +21,37 @@ public float poseTransitionDuration = 3f;
 
     private GameObject _handStartPrefab;
     private bool IsStopAnimation;
+    private bool IsRunning;
+    
+     
+    [SerializeField]
+    private Renderer _hand1Renderer;
+    [SerializeField]
+    private Renderer _hand2Renderer;
+    
+    private IEnumerator coroutine;
 
     // Start is called before the first frame update
     void Start()
     {
         _handStartPrefab = Instantiate(handStartPrefab, startHandPose.transform.position, handStartPrefab.transform.localRotation);
         _handStartPrefab.SetActive(false);
-        ActivateTransition();
+        // ActivateTransition();
+        _hand2Renderer.enabled = false;
     }
 
     public void ActivateTransition()
     {
+        if(IsRunning) {return;}
+        IsRunning = true;
+        
+        _hand1Renderer.enabled = false;
         _handStartPrefab.SetActive(true);
         SetHandDataValues(startHandPose, nextHandPose);
-        StartCoroutine(SetHandDataRoutine(_handStartPrefab.GetComponent<CustomHandData>(), finalHandPosition, finalHandRotation, finalFingerRotations, startingHandPosition, startingHandRotation, startingFingerRotations));
+        coroutine = SetHandDataRoutine(_handStartPrefab.GetComponent<CustomHandData>(), finalHandPosition,
+            finalHandRotation, finalFingerRotations, startingHandPosition, startingHandRotation,
+            startingFingerRotations);
+        StartCoroutine(coroutine);
     }
 
     private void OnDisable()
@@ -50,11 +67,6 @@ public float poseTransitionDuration = 3f;
             h1.root.position.y / h1.root.localScale.y, h1.root.position.z / h1.root.localScale.z);
         finalHandPosition = new Vector3(h2.root.position.x / h2.root.localScale.x,
             h2.root.position.y / h2.root.localScale.y, h2.root.position.z / h2.root.localScale.z);
-        
-        // startingHandPosition = new Vector3( h1.root.position.x / h1.root.localScale.x,
-        //     h1.root.position.y / h1.root.localScale.y, h1.root.position.z / h1.root.localScale.z);
-        // finalHandPosition = new Vector3(h2.root.localPosition.x / h2.root.localScale.x,
-        //     h2.root.position.y / h2.root.localScale.y, h2.root.position.z / h2.root.localScale.z);
 
         startingHandRotation = h1.root.localRotation;
         finalHandRotation = h2.root.localRotation;
@@ -113,6 +125,8 @@ public float poseTransitionDuration = 3f;
             h.fingerBones[i].localRotation = newBonesRotation[i];
         }
 
+        _hand2Renderer.enabled = true;
+        
         
         if (!IsStopAnimation)
         {
@@ -138,5 +152,29 @@ public float poseTransitionDuration = 3f;
         {
             poseToMirror.fingerBones[i].localRotation = poseUsedToMirror.fingerBones[i].localRotation;
         }
+    }
+
+    public void ResetHands()
+    {
+        DisableAll();
+        _hand1Renderer.enabled = true;
+    }
+
+    public void DisableAll()
+    {
+        IsStopAnimation = true;
+        IsRunning = false;
+        if (coroutine != null)
+        {
+            StopCoroutine(coroutine);
+        }
+        _hand1Renderer.enabled = false;
+        _hand2Renderer.enabled = false;
+        _handStartPrefab.SetActive(false);
+    }
+    
+    public void OnFinished()
+    {
+        DisableAll();
     }
 }
