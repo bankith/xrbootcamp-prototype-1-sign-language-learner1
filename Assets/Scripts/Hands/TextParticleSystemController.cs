@@ -16,7 +16,7 @@ public class TextParticleSystemController : MonoBehaviour
     {
         rendererSystem = textParticleSystem.GetComponent<ParticleSystemRenderer>();
         rendererSystem.mesh = textMeshPro.mesh;
-        if (audioTrigger)
+        if (audioTrigger != null)
         {
             audioTrigger.PlayAudio();
         }
