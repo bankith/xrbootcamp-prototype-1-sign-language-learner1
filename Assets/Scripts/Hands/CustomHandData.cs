@@ -19,9 +19,14 @@ public class CustomHandData : MonoBehaviour
 
     public Material HandMaterialDefault;
     public Material HandMaterialActive;
-
+    [SerializeField]
+    public GameObject poseActiveVisualPrefab;
     private void Start()
     {
+        if (poseActiveVisualPrefab)
+        {
+            poseActiveVisualPrefab.SetActive(false);
+        }
         
     }
 

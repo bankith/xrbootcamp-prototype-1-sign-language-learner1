@@ -38,7 +38,7 @@ public float poseTransitionDuration = 3f;
     // Start is called before the first frame update
     void Start()
     {
-        _handStartPrefab = Instantiate(handStartPrefab, startHandPose.transform.localPosition, handStartPrefab.transform.localRotation);
+        _handStartPrefab = Instantiate(handStartPrefab, startHandPose.transform.localPosition, handStartPrefab.transform.rotation);
         _handStartPrefab.SetActive(false);
         
         _hand2Renderer.enabled = false;
@@ -83,38 +83,38 @@ public float poseTransitionDuration = 3f;
         finalHandPosition = new Vector3(h2.root.position.x / h2.root.localScale.x,
             h2.root.position.y / h2.root.localScale.y, h2.root.position.z / h2.root.localScale.z);
 
-        startingHandRotation = h1.root.localRotation;
-        finalHandRotation = h2.root.localRotation;
+        startingHandRotation = h1.root.rotation;
+        finalHandRotation = h2.root.rotation;
 
         startingFingerRotations = new Quaternion[h1.fingerBones.Length];
         finalFingerRotations = new Quaternion[h1.fingerBones.Length];
 
         for (int i = 0; i < h1.fingerBones.Length; i++)
         {
-            startingFingerRotations[i] = h1.fingerBones[i].localRotation;
-            finalFingerRotations[i] = h2.fingerBones[i].localRotation;
+            startingFingerRotations[i] = h1.fingerBones[i].rotation;
+            finalFingerRotations[i] = h2.fingerBones[i].rotation;
         }
     }
 
     public void SetHandData(CustomHandData h, Vector3 newPosition, Quaternion newRotation, Quaternion[] newBonesRotation)
     {
         h.root.position = newPosition;
-        h.root.localRotation = newRotation;
+        h.root.rotation = newRotation;
 
         for (int i = 0; i < newBonesRotation.Length; i++)
         {
-            h.fingerBones[i].localRotation = newBonesRotation[i];
+            h.fingerBones[i].rotation = newBonesRotation[i];
         }
     }
 
     public IEnumerator SetHandDataRoutine(CustomHandData h, Vector3 newPosition, Quaternion newRotation, Quaternion[] newBonesRotation,Vector3 startingPosition, Quaternion startingRotation, Quaternion[] startingBonesRotation)
     {
         h.root.position = startingPosition;
-        h.root.localRotation = startingRotation;
+        h.root.rotation = startingRotation;
 
         for (int i = 0; i < startingBonesRotation.Length; i++)
         {
-            h.fingerBones[i].localRotation = startingBonesRotation[i];
+            h.fingerBones[i].rotation = startingBonesRotation[i];
         }
         
         yield return new WaitForSeconds(waitTimeStarting);
@@ -127,11 +127,11 @@ public float poseTransitionDuration = 3f;
             Quaternion r = Quaternion.Lerp(startingRotation, newRotation, timer / poseTransitionDuration);
 
             h.root.position = p;
-            h.root.localRotation = r;
+            h.root.rotation = r;
 
             for (int i = 0; i < newBonesRotation.Length; i++)
             {
-                h.fingerBones[i].localRotation = Quaternion.Lerp(startingBonesRotation[i], newBonesRotation[i], timer / poseTransitionDuration);
+                h.fingerBones[i].rotation = Quaternion.Lerp(startingBonesRotation[i], newBonesRotation[i], timer / poseTransitionDuration);
             }
 
             timer += Time.deltaTime;
@@ -139,11 +139,11 @@ public float poseTransitionDuration = 3f;
         }
         
         // h.root.position = newPosition;
-        // h.root.localRotation = newRotation;
+        // h.root.rotation = newRotation;
         //
         // for (int i = 0; i < newBonesRotation.Length; i++)
         // {
-        //     h.fingerBones[i].localRotation = newBonesRotation[i];
+        //     h.fingerBones[i].rotation = newBonesRotation[i];
         // }
 
         // _hand2Renderer.enabled = true;
@@ -168,16 +168,16 @@ public float poseTransitionDuration = 3f;
         Vector3 mirroredPosition = poseUsedToMirror.root.position;
         mirroredPosition.x *= -1;
 
-        Quaternion mirroredQuaternion = poseUsedToMirror.root.localRotation;
+        Quaternion mirroredQuaternion = poseUsedToMirror.root.rotation;
         mirroredQuaternion.y *= -1;
         mirroredQuaternion.z *= -1;
 
         poseToMirror.root.position = mirroredPosition;
-        poseToMirror.root.localRotation = mirroredQuaternion;
+        poseToMirror.root.rotation = mirroredQuaternion;
 
         for (int i = 0; i < poseUsedToMirror.fingerBones.Length; i++)
         {
-            poseToMirror.fingerBones[i].localRotation = poseUsedToMirror.fingerBones[i].localRotation;
+            poseToMirror.fingerBones[i].rotation = poseUsedToMirror.fingerBones[i].rotation;
         }
     }
 
@@ -202,6 +202,11 @@ public float poseTransitionDuration = 3f;
     
     public void OnFinished()
     {
+        if (nextHandPose.poseActiveVisualPrefab != null)
+        {
+            nextHandPose.poseActiveVisualPrefab.SetActive(true);
+        }
+        
         if (_handStartPrefab.TryGetComponent(out CustomHandData customHandData))
         {
             customHandData.SetHandMaterialActive();
@@ -211,6 +216,11 @@ public float poseTransitionDuration = 3f;
 
     public void OnUnfinished()
     {
+        if (nextHandPose.poseActiveVisualPrefab != null)
+        {
+            nextHandPose.poseActiveVisualPrefab.SetActive(false);
+        }
+        
         if (_handStartPrefab.TryGetComponent(out CustomHandData customHandData))
         {
             customHandData.SetHandMaterialDefault();
